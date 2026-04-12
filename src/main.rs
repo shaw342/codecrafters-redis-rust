@@ -16,11 +16,9 @@ fn main() {
                 let mut buffer = [0; 512];
 
                 match _stream.read(&mut buffer) {
-                    Ok(n) => {
-                        if &buffer[0..n] == b"PING" {
-                            println!("{:?}", buffer);
-                            let _ = _stream.write_all(b"+PONG\r\n");
-                        }
+                    Ok(_n) => {
+                        println!("{:?}", buffer);
+                        let _ = _stream.write_all(b"+PONG\r\n");
                     }
                     Err(e) => {
                         println!("error: {}", e)

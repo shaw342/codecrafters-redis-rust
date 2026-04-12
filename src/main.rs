@@ -18,7 +18,7 @@ fn main() {
                 match _stream.read(&mut buffer) {
                     Ok(n) => {
                         if &buffer[0..n] == b"PING" {
-                            let _ = _stream.write_all(b"+PONG\r\n");
+                            let _ = _stream.write_all(b"PONG");
                         }
                     }
                     Err(e) => {

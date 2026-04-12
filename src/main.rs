@@ -8,7 +8,7 @@ fn main() {
 
     // Uncomment the code below to pass the first stage
     //
-    let listener = TcpListener::bind("127.0.0.1:6379").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:6380").unwrap();
 
     for stream in listener.incoming() {
         match stream {
@@ -18,7 +18,8 @@ fn main() {
                 match _stream.read(&mut buffer) {
                     Ok(n) => {
                         if &buffer[0..n] == b"PING" {
-                            let _ = _stream.write_all(b"PONG");
+                            println!("{:?}", buffer);
+                            let _ = _stream.write_all(b"+PONG\r\n");
                         }
                     }
                     Err(e) => {

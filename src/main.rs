@@ -15,21 +15,23 @@ fn main() {
             Ok(mut _stream) => {
                 let mut buffer = [0; 512];
 
-                let lignes: Vec<&[u8]> = buffer.split(|x| x == b'\n').collect();
+                match _stream.read(&mut buffer) {
+                    Ok(_n) => {
+                        let lignes: Vec<&[u8]> = buffer.split(|x| *x == b'\n').collect();
 
-                for ligne in lignes {
-                    match _stream.read(&mut ligne) {
-                        Ok(_n) => {
-                            println!("{:?}", ligne);
-                            let _ = _stream.write_all(b"+PONG\r\n");
+                        for ligne in lignes {
+                            if ligne == b"PING" {
+                                let _ = _stream.write_all(b"+PONG\r\n");
+                            }
                         }
+                    }
 
-                        Err(e) => {
-                            println!("error: {}", e)
-                        }
+                    Err(e) => {
+                        println!("error: {}", e)
                     }
                 }
             }
+
             Err(e) => {
                 println!("error: {}", e);
             }

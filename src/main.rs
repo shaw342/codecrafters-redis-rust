@@ -12,25 +12,19 @@ fn main() {
 
     for stream in listener.incoming() {
         match stream {
-            Ok(mut _stream) => {
+            Ok(mut _stream) => loop {
                 let mut buffer = [0; 512];
 
                 match _stream.read(&mut buffer) {
                     Ok(_n) => {
-                        let lignes: Vec<&[u8]> = buffer.split(|x| *x == b'\n').collect();
-
-                        for ligne in lignes {
-                            if ligne == b"PING" {
-                                let _ = _stream.write_all(b"+PONG\r\n");
-                            }
-                        }
+                        let _ = _stream.write_all(b"+PONG\r\n");
                     }
 
                     Err(e) => {
                         println!("error: {}", e)
                     }
                 }
-            }
+            },
 
             Err(e) => {
                 println!("error: {}", e);

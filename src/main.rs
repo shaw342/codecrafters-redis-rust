@@ -15,13 +15,18 @@ fn main() {
             Ok(mut _stream) => {
                 let mut buffer = [0; 512];
 
-                match _stream.read(&mut buffer) {
-                    Ok(_n) => {
-                        println!("{:?}", buffer);
-                        let _ = _stream.write_all(b"+PONG\r\n");
-                    }
-                    Err(e) => {
-                        println!("error: {}", e)
+                let lignes: Vec<&[u8]> = buffer.split(|x| x == b'\n').collect();
+
+                for ligne in lignes {
+                    match _stream.read(&mut ligne) {
+                        Ok(_n) => {
+                            println!("{:?}", ligne);
+                            let _ = _stream.write_all(b"+PONG\r\n");
+                        }
+
+                        Err(e) => {
+                            println!("error: {}", e)
+                        }
                     }
                 }
             }

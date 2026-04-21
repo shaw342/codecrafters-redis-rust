@@ -1,13 +1,6 @@
+use bytes::{BytesMut, buf};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
-
-fn parse_command(buf: &[u8]) -> String {
-    let data = String::from_utf8_lossy(buf);
-    return data
-        .split("\r\n")
-        .filter(|s| !s.starts_with("*") && !s.starts_with("$") && !s.is_empty())
-        .collect();
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -23,15 +16,19 @@ async fn main() -> anyhow::Result<()> {
                 match socket.read(&mut buffer).await {
                     Ok(0) => return,
                     Ok(_n) => {
-                        let cmd = parse_command(&mut buffer);
-                        match cmd {
-                            cmd => {
-                                if cmd == "ECHO" {
-                                    eprintln!("PONG");
+                        let data = String::from_utf8_lossy(&buffer);
+
+                        if data.contains("ECHO") {
+                            let result: Vec<&str> = data.split("\r\n").collect();
+
+                            if let Some(arg) = result.get(4) {
+                                let response = format!("${}\r\n{}\r\n", arg.len(), arg);
+                                if let Err(e) = socket.write_all(response.as_bytes()).await {
+                                    eprintln!("Erreur lors de l'écriture : {}", e);
+                                    return;
                                 }
                             }
                         }
-
                         if let Err(e) = socket.write_all(b"+PONG\r\n").await {
                             eprintln!("Erreur lors de l'écriture : {}", e);
                             return;
@@ -53,12 +50,8 @@ mod test {
 
     #[test]
     fn feature_parse_command() {
-        let str = parse_command(b"*1\r\n$4\r\nPING\r\n");
+        let str = parse_command(b"*2\r\n$4\r\nECHO\r\n$5\r\nmango\r\n");
 
-        assert_eq!(
-            "PING", str,
-            "we are testing addition with {} and {}",
-            "PING", str
-        );
+        assert_eq!(Input::Command("ECHO"), str);
     }
 }

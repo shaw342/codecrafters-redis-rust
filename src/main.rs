@@ -28,10 +28,11 @@ async fn main() -> anyhow::Result<()> {
                                     return;
                                 }
                             }
-                        }
-                        if let Err(e) = socket.write_all(b"+PONG\r\n").await {
-                            eprintln!("Erreur lors de l'écriture : {}", e);
-                            return;
+                        } else {
+                            if let Err(e) = socket.write_all(b"+PONG\r\n").await {
+                                eprintln!("Erreur lors de l'écriture : {}", e);
+                                return;
+                            }
                         }
                     }
                     Err(e) => {
